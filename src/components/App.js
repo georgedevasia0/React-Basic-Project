@@ -6,6 +6,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      data: [],
       title: '',
       body: '',
       x: '',
@@ -16,7 +17,16 @@ class App extends Component {
     this.handlesubmit = this.handlesubmit.bind(this)
   }
 
-
+  componentDidMount(){
+    database.on('value', (snapShot) => {
+      let data = [];
+      snapShot.forEach(item =>{
+        // console.log(item.val())
+        data.push(item.val());
+        this.setState({data})
+      })
+    })
+  }
 
   handleChange(e) {
     this.setState(
@@ -39,6 +49,8 @@ class App extends Component {
     })
   }
   render() {
+    let {data} = this.state;
+    // console.log(data);
     return (
       <div className="container-fluid">
         <div className="row">
@@ -57,6 +69,12 @@ class App extends Component {
             {this.state.x}
           </div>
         </div>
+        {data.length > 0 && data.map((item,_idx)=>(
+          <div key={_idx}>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+            </div>
+        ))}
       </div>
     );
   }
