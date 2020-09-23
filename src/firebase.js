@@ -13,4 +13,8 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 
-export const database = firebase.database().ref('/notes')
+// export const database = firebase.database().ref('/notes')
+const database = firebase.database().ref();
+const reference = firebase.database();
+
+export {database, reference}

@@ -1,11 +1,12 @@
-import React, { Component } from 'react';
-import { database } from '../firebase';
+import React, { Component,useState,useEffect } from 'react';
+import { database, reference } from '../firebase';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      collection: [],
       title: '',
       body: '',
       x: '',
@@ -16,7 +17,13 @@ class App extends Component {
     this.handlesubmit = this.handlesubmit.bind(this)
   }
 
-
+  componentDidMount(){
+    database.on('value', (snapShot) => {
+      let collection = Object.keys(snapShot.val())
+      // console.log(collection.length)
+      this.setState({collection})
+    })
+  }
 
   handleChange(e) {
     this.setState(
@@ -39,6 +46,7 @@ class App extends Component {
     })
   }
   render() {
+    let {collection} = this.state;
     return (
       <div className="container-fluid">
         <div className="row">
@@ -57,9 +65,45 @@ class App extends Component {
             {this.state.x}
           </div>
         </div>
+        {collection.length > 0 && collection.map((item,_idx)=>(
+          <div key={_idx}>
+            <h3>{item}</h3>
+            <RenderMsg title={item}/>
+            </div>
+        ))}
       </div>
     );
   }
+}
+
+function RenderMsg ({title}) {
+  const [document, setDocument] = useState([])
+
+  useEffect(() => {
+    reference.ref(title).on("value", (snapShot) =>{
+      let data = [];
+      snapShot.forEach(item =>{
+        data.push(item.val());
+      })
+      setDocument(data)
+    } )    
+  }, [title])
+
+  return(
+   <>
+      {document.length > 0 && document.map((item,_idx) => (
+        <div key={_idx} style={{marginLeft: "2rem"}}>
+        <h4 >{Array.isArray(item) && _idx+1}</h4>
+        {/* {console.log(Array.isArray(item))} */}
+        <div>
+          {Array.isArray(item) && item.map((msg,idx)=>(
+            <p key={idx}>{msg}</p>
+          ))}
+        </div>
+        </div>
+      ))}
+   </>
+  )
 }
 
 export default App;
